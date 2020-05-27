@@ -1,0 +1,71 @@
+apply plugin: 'com.android.library'
+
+def configAndroid = rootProject.ext.android
+def configDependencies = rootProject.ext.dependencies
+
+android {
+    compileSdkVersion configAndroid.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion configAndroid.minSdkVersion
+        targetSdkVersion configAndroid.targetSdkVersion
+        versionCode configAndroid.versionCode
+        versionName configAndroid.versionName
+        testInstrumentationRunner configAndroid.testInstrumentationRunner
+
+        //common_base中配置BuildConfig 代码中可以访问isDebug
+        buildConfigField("boolean", "isDebug", String.valueOf(isDebug))
+
+        //阿里arouter配置
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation configDependencies["appcompat-v7"]
+    implementation configDependencies["junit"]
+    androidTestImplementation configDependencies["runner"]
+    androidTestImplementation configDependencies["espresso-core"]
+    //阿里arouter配置
+    api configDependencies["arouter-api"]
+    annotationProcessor configDependencies["arouter-compiler"]
+
+    //   -------------- 常用第三方库 annotationProcessor需要在使用模块下再次配置---------
+    //   --------------  butterknife --------
+    api configDependencies["butterknife"]
+    annotationProcessor configDependencies["butterknife-compiler"]
+    //    ------------ RxJava 相关 ---------
+    api configDependencies["rxjava"]
+    api configDependencies["rxandroid"]
+    //    api 'com.squareup.retrofit2:adapter-rxjava:2.3.0' //此adapter 会与 rxjava2 有冲突，用下方的可以解决
+    api configDependencies["adapter-rxjava2"]
+    // ---------------  rxlifecycle2 解决RxJava内存泄漏 --------------
+    // Android组件库，里面定义了例如RxAppCompatActivity、RxFragment之类的Android组件
+    // 内部引用了基础库和Android库，如果使用此库则无需再重复引用
+    api configDependencies["rxlifecycle-components"]
+    // Android使用的库，继承NaviActivity使用
+    api configDependencies["rxlifecycle-navi"]
+    //    ---------- Retrofit 相关 --------
+    api configDependencies["retrofit"]
+    //retrofit 常见类converter
+    api configDependencies["converter-scalars"]
+    //retrofit Json converter
+    api configDependencies["converter-gson"]
+    api configDependencies["recyclerview-v7"]
+    api configDependencies["glide"]
+    annotationProcessor configDependencies["compiler"]
+}

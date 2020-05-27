@@ -1,0 +1,64 @@
+if (isDebug) {//调试版(独立运行)
+    apply plugin: 'com.android.application'
+} else {
+    apply plugin: 'com.android.library'
+    apply plugin: 'com.jakewharton.butterknife'//非调试版需要用R2
+}
+
+def configAndroid = rootProject.ext.android
+def configDependencies = rootProject.ext.dependencies
+
+android {
+    compileSdkVersion configAndroid.compileSdkVersion
+
+    defaultConfig {
+        if (isDebug)//调试版(独立运行)
+            applicationId "com.administer.example.module_home"
+
+        minSdkVersion configAndroid.minSdkVersion
+        targetSdkVersion configAndroid.targetSdkVersion
+        versionCode configAndroid.versionCode
+        versionName configAndroid.versionName
+        testInstrumentationRunner configAndroid.testInstrumentationRunner
+        //配置资源文件
+        sourceSets {
+            main {
+                if (isDebug) {//调试版(独立运行)
+                    manifest.srcFile 'src/main/AndroidManifest.xml'
+                } else {
+                    manifest.srcFile 'src/main/AndroidManifest2.xml'
+                }
+            }
+        }
+        //阿里arouter配置
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation configDependencies["appcompat-v7"]
+    implementation configDependencies["constraint-layout"]
+    implementation configDependencies["junit"]
+    androidTestImplementation configDependencies["runner"]
+    androidTestImplementation configDependencies["espresso-core"]
+    implementation project(':common_base')
+    //阿里arouter配置
+    annotationProcessor configDependencies["arouter-compiler"]
+
+    annotationProcessor configDependencies["butterknife-compiler"]
+    annotationProcessor configDependencies["compiler"]
+
+}
